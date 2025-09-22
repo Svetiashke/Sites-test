@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Живе Портфоліо</title>
+<style>
+  html,body{margin:0;padding:0;overflow-x:hidden;font-family:sans-serif;background:#0b1020;color:#fff;height:100%;}
+  canvas{position:fixed;top:0;left:0;z-index:-1;}
+  header{display:flex;justify-content:space-between;align-items:center;padding:20px 40px;position:relative;z-index:10;}
+  header h1{font-size:32px;margin:0;}
+  nav a{color:#fff;text-decoration:none;margin-left:20px;font-weight:600;transition:0.3s;}
+  nav a:hover{color:#ff5ca3;}
+  .section{min-height:100vh;padding:60px 40px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;transition:all 0.5s;}
+  .projects{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;width:100%;max-width:1000px;margin-top:40px;}
+  .card{background:rgba(255,255,255,0.05);padding:20px;border-radius:16px;backdrop-filter:blur(6px);transition:transform 0.3s, box-shadow 0.3s;cursor:pointer;}
+  .card:hover{transform:translateY(-10px) scale(1.05);box-shadow:0 20px 60px rgba(255,255,255,0.2);}
+  .btn{padding:10px 20px;border:none;border-radius:12px;background:#ff5ca3;color:#fff;font-weight:600;cursor:pointer;margin-top:20px;transition:0.3s;}
+  .btn:hover{background:#ff9a3c;}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<header>
+  <h1>Ілля Крушевський</h1>
+  <nav>
+    <a href="#about">Про мене</a>
+    <a href="#projects">Проєкти</a>
+    <a href="#contact">Контакти</a>
+  </nav>
+</header>
+
+<section class="section" id="about">
+  <h2>Привіт! Я створюю інтерактивні UI та портфоліо</h2>
+  <p>Сайт оживає як відео: анімації, інтерактивні карти проєктів, реагування на курсор.</p>
+</section>
+
+<section class="section" id="projects">
+  <h2>Проєкти</h2>
+  <div class="projects" id="projectGrid"></div>
+</section>
+
+<section class="section" id="contact">
+  <h2>Контакти</h2>
+  <p>Напишіть мені!</p>
+  <button class="btn" onclick="alert('Дякую! Це демо форма.')">Відправити повідомлення</button>
+</section>
+
+<script>
+/* ====== Canvas Background ====== */
+const canvas=document.getElementById('bg');
+const ctx=canvas.getContext('2d');
+let w=canvas.width=window.innerWidth;
+let h=canvas.height=window.innerHeight;
+
+window.addEventListener('resize',()=>{w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;});
+
+class Blob{
+  constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.r=20+Math.random()*40;this.dx=(Math.random()-0.5)*2;this.dy=(Math.random()-0.5)*2;this.color=`hsl(${Math.random()*360},70%,50%)`}
+  update(){this.x+=this.dx;this.y+=this.dy; if(this.x<0||this.x>w)this.dx*=-1; if(this.y<0||this.y>h)this.dy*=-1;}
+  draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}
+}
+const blobs=[];
+for(let i=0;i<30;i++)blobs.push(new Blob());
+
+function animate(){
+  ctx.clearRect(0,0,w,h);
+  blobs.forEach(b=>{b.update();b.draw();});
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ====== Projects ====== */
+const projects=[
+  {title:'Alien Goldd UI',desc:'Adaptive e-commerce UI with mobile filters'},
+  {title:'Pacman Mobile',desc:'Kivy touch & lightweight physics'},
+  {title:'Roblox Phone UI',desc:'In-game phone with mini apps & easter eggs'},
+  {title:'Micro Interactions',desc:'Hover & micro animations'},
+  {title:'Shop Animation Pack',desc:'Animated product cards & cart interactions'}
+];
+const grid=document.getElementById('projectGrid');
+projects.forEach(p=>{
+  const card=document.createElement('div'); card.className='card';
+  card.innerHTML=`<h3>${p.title}</h3><p>${p.desc}</p>`;
+  card.addEventListener('mousemove',e=>{
+    const rect=card.getBoundingClientRect();
+    const x=e.clientX-rect.left-rect.width/2;
+    const y=e.clientY-rect.top-rect.height/2;
+    card.style.transform=`translate(${x*0.05}px,${y*0.05}px) scale(1.05)`;
+  });
+  card.addEventListener('mouseleave',()=>{card.style.transform='translate(0,0) scale(1)';});
+  grid.appendChild(card);
+});
+
+/* ====== Cursor Interaction for Canvas ====== */
+window.addEventListener('mousemove',e=>{
+  blobs.forEach(b=>{
+    const dx=b.x-e.clientX;
+    const dy=b.y-e.clientY;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<100){b.x+=dx*0.01;b.y+=dy*0.01;}
+  });
+});
+</script>
+
+</body>
+</html>
